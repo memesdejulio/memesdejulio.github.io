@@ -37,7 +37,7 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
         const manifest = await manifestResponse.json();
         const localMemes: Meme[] = manifest.memes.map((memeInfo: any, index: number) => ({
           id: index + 1,
-          title: memeInfo.title || `Meme del ${day} de julio`,
+          title: memeInfo.title || (day === 0 ? 'Meme de Julio se acerca' : `Meme del ${day} de julio`),
           imageUrl: `/memes/${day}/${memeInfo.filename}`,
           submittedBy: memeInfo.submittedBy || 'Usuario',
           approved: true,
@@ -60,7 +60,7 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
             if (imageResponse.ok) {
               localMemes.push({
                 id: localMemes.length + 1,
-                title: `Meme del ${day} de julio`,
+                title: day === 0 ? 'Meme de Julio se acerca' : `Meme del ${day} de julio`,
                 imageUrl: `/memes/${day}/${filename}`,
                 submittedBy: 'Usuario',
                 approved: true,
@@ -82,7 +82,11 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
 
   // Load memes when component mounts or date changes
   useEffect(() => {
-    loadLocalMemes(currentDate.getDate());
+    // For Day 0, use day "0", for July dates use the day number
+    const dayNumber = currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear 
+      ? 0 
+      : currentDate.getDate();
+    loadLocalMemes(dayNumber);
   }, [currentDate]);
 
   const handleMemeSubmitted = () => {
@@ -117,8 +121,13 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
   const navigateDay = (direction: 'prev' | 'next') => {
     const newDate = direction === 'prev' ? subDays(currentDate, 1) : addDays(currentDate, 1);
     
-    // Only allow navigation within July of current year
-    if (newDate.getMonth() === 6 && newDate.getFullYear() === currentYear) {
+    // Allow navigation within July of current year, or to/from Day 0 (June 30th)
+    const isDayZero = currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear;
+    const isJulyDate = newDate.getMonth() === 6 && newDate.getFullYear() === currentYear;
+    const isFromDayZeroToJuly = isDayZero && newDate.getMonth() === 6 && newDate.getDate() === 1 && newDate.getFullYear() === currentYear;
+    const isFromJulyToDayZero = currentDate.getMonth() === 6 && currentDate.getDate() === 1 && currentDate.getFullYear() === currentYear && newDate.getMonth() === 5 && newDate.getDate() === 30 && newDate.getFullYear() === currentYear;
+    
+    if (isJulyDate || isFromDayZeroToJuly || isFromJulyToDayZero) {
       setCurrentDate(newDate);
       if (onDateChange) {
         onDateChange(newDate);
@@ -128,12 +137,18 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
 
   const canNavigatePrev = () => {
     const prevDay = subDays(currentDate, 1);
-    return prevDay.getMonth() === 6 && prevDay.getFullYear() === currentYear;
+    const isDayZero = currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear;
+    const isJulyDate = prevDay.getMonth() === 6 && prevDay.getFullYear() === currentYear;
+    const isFromDayZeroToJuly = isDayZero && prevDay.getMonth() === 6 && prevDay.getDate() === 1 && prevDay.getFullYear() === currentYear;
+    return isJulyDate || isFromDayZeroToJuly;
   };
 
   const canNavigateNext = () => {
     const nextDay = addDays(currentDate, 1);
-    return nextDay.getMonth() === 6 && nextDay.getFullYear() === currentYear;
+    const isDayZero = currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear;
+    const isJulyDate = nextDay.getMonth() === 6 && nextDay.getFullYear() === currentYear;
+    const isFromJulyToDayZero = currentDate.getMonth() === 6 && currentDate.getDate() === 1 && currentDate.getFullYear() === currentYear && nextDay.getMonth() === 5 && nextDay.getDate() === 30 && nextDay.getFullYear() === currentYear;
+    return isJulyDate || isFromJulyToDayZero;
   };
 
   if (showSubmissionForm) {
@@ -170,7 +185,10 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
             </Button>
             
             <h1 className="text-3xl md:text-5xl font-bold text-white text-center drop-shadow-lg whitespace-nowrap">
-              Memes del {format(currentDate, "d 'de julio'")}
+              {currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear 
+                ? "Julio se acerca" 
+                : `Memes del ${format(currentDate, "d 'de julio'")}`
+              }
             </h1>
             
             <Button

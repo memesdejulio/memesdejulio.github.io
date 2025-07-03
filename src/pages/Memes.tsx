@@ -14,10 +14,19 @@ const Memes = () => {
   const julyDate = new Date(currentYear, 6, 15); // July is month 6 (0-indexed), use middle of month for better view
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date(currentYear, 6, 1)); // Start with first week of July
 
+  // Create a special day 0 date (June 30th of current year)
+  const dayZeroDate = new Date(currentYear, 5, 30); // June 30th (month 5, day 30)
+
   const handleDateSelect = (date: Date | undefined) => {
-    if (date && date.getMonth() === 6 && date.getFullYear() === currentYear) { // Only allow July dates of current year
-      setSelectedDate(date);
-      setViewingDay(true);
+    if (date) {
+      // Allow both day 0 (June 30th) and July dates of current year
+      const isDayZero = date.getTime() === dayZeroDate.getTime();
+      const isJulyDate = date.getMonth() === 6 && date.getFullYear() === currentYear;
+      
+      if (isDayZero || isJulyDate) {
+        setSelectedDate(date);
+        setViewingDay(true);
+      }
     }
   };
 
@@ -65,6 +74,37 @@ const Memes = () => {
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
+
+        {/* Day 0 Button for Mobile */}
+        <div className="mb-4">
+          <button
+            onClick={() => handleDateSelect(dayZeroDate)}
+            className={`
+              w-full h-20 rounded-2xl font-semibold text-xl transition-all duration-200 flex items-center justify-between px-8
+              cursor-pointer hover:bg-gradient-to-r hover:from-purple-400 hover:to-pink-400 hover:text-white text-gray-700 border-2 border-gray-200 hover:border-transparent bg-white
+              ${selectedDate && selectedDate.getTime() === dayZeroDate.getTime() ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-transparent shadow-lg' : ''}
+            `}
+          >
+            <div className="flex items-center space-x-4">
+              <div className="text-3xl font-bold">
+                0
+              </div>
+              <div className="text-left">
+                <div className="text-xl font-semibold">
+                  Julio se acerca
+                </div>
+                <div className="text-sm opacity-75">
+                  {format(dayZeroDate, 'MMMM d, yyyy')}
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-2xl">
+              🎯
+            </div>
+          </button>
+        </div>
+
 
         {/* Vertical Day List */}
         <div className="space-y-4">
@@ -167,16 +207,36 @@ const Memes = () => {
                     day: "h-16 w-16 p-0 font-semibold aria-selected:opacity-100 hover:bg-gradient-to-r hover:from-purple-400 hover:to-pink-400 hover:text-white rounded-xl transition-all duration-200 cursor-pointer text-gray-700 text-xl",
                     day_selected: "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600",
                     day_today: "bg-yellow-400 text-gray-900 font-bold",
-                    day_outside: "text-gray-300 opacity-50 cursor-not-allowed",
-                    day_disabled: "text-gray-300 opacity-50 cursor-not-allowed",
+                    day_outside: "invisible",
+                    day_disabled: "invisible",
                     day_hidden: "invisible",
                   }}
                   disabled={(date) => {
-                    // Only disable dates that are not in July of current year
-                    // This allows the calendar to show the full month view
-                    return date.getMonth() !== 6 || date.getFullYear() !== currentYear;
+                    const isJulyDate = date.getMonth() === 6 && date.getFullYear() === currentYear;
+                    return !isJulyDate
                   }}
                 />
+                
+                {/* Day 0 Button for Desktop */}
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={() => handleDateSelect(dayZeroDate)}
+                    className={`
+                      h-16 px-8 rounded-2xl font-semibold text-xl transition-all duration-200 flex items-center justify-between
+                      cursor-pointer hover:bg-gradient-to-r hover:from-purple-400 hover:to-pink-400 hover:text-white text-gray-700 border-2 border-gray-200 hover:border-transparent bg-white
+                      ${selectedDate && selectedDate.getTime() === dayZeroDate.getTime() ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-transparent shadow-lg' : ''}
+                    `}
+                    style={{ zIndex: 1000 }}
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="text-left">
+                        <div className="text-xl font-semibold">
+                          Julio se acerca
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
