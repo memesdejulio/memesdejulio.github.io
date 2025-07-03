@@ -309,16 +309,24 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
                 className="bg-white/95 backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl border border-white/20 hover:scale-105 transition-transform duration-300 cursor-pointer"
                 onClick={() => handleMemeClick(meme)}
               >
-                <div className="aspect-square overflow-hidden">
+                <div className="relative justify-center flex aspect-square overflow-hidden">
+                  <img
+                    src={meme.imageUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110"
+                    style={{ zIndex: 0 }}
+                    draggable={false}
+                  />
                   <img
                     src={meme.imageUrl}
                     alt={meme.title}
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                    className="relative z-10 max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                     onError={(e) => {
                       // Handle broken images
                       const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
+                      target.style.display = "none";
                     }}
                   />
                 </div>
