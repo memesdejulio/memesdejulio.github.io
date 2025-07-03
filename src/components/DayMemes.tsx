@@ -5,6 +5,29 @@ import { ArrowLeft, Plus, Download, X, ChevronLeft, ChevronRight } from "lucide-
 import { format, addDays, subDays } from "date-fns";
 import MemeSubmissionForm from "./MemeSubmissionForm";
 
+// Custom slider styles
+const sliderStyles = `
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+`;
+
 interface DayMemesProps {
   date: Date;
   onBack: () => void;
@@ -24,6 +47,7 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
   const [currentDate, setCurrentDate] = useState(date);
   const [memes, setMemes] = useState<Meme[]>([]);
+  const [imageScale, setImageScale] = useState(1);
 
   const currentYear = new Date().getFullYear();
 
@@ -97,6 +121,7 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
 
   const handleMemeClick = (meme: Meme) => {
     setSelectedMeme(meme);
+    setImageScale(1); // Reset scale when opening a new meme
   };
 
   const handleDownload = async (imageUrl: string, title: string) => {
@@ -162,6 +187,7 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-400 via-red-500 to-pink-500 p-4">
+      <style>{sliderStyles}</style>
       <div className="max-w-6xl mx-auto">
         {/* Mobile: Back button at top */}
         <div className="block lg:hidden mb-4">
@@ -310,53 +336,90 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
         )}
 
         {/* Image Modal */}
-        <Dialog open={!!selectedMeme} onOpenChange={() => setSelectedMeme(null)}>
-          <DialogContent className="max-w-4xl w-full max-h-[90vh] p-0 overflow-hidden">
-            {selectedMeme && (
-              <div className="relative">
-                <DialogHeader className="absolute top-0 left-0 right-0 z-10 bg-black/50 backdrop-blur-sm text-white p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <DialogTitle className="text-xl font-bold">
-                        {selectedMeme.title}
-                      </DialogTitle>
-                      <p className="text-sm opacity-90">
-                        Por: {selectedMeme.submittedBy}
-                      </p>
+        {selectedMeme && (
+          <Dialog open={true} onOpenChange={() => setSelectedMeme(null)}>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <div 
+                className="bg-black rounded-lg shadow-2xl transition-transform duration-200 origin-center overflow-hidden"
+                style={{ 
+                  transform: `scale(${imageScale})`,
+                  maxWidth: `${100 / imageScale}%`,
+                  maxHeight: `${100 / imageScale}%`,
+                  width: 'max-content',
+                  height: 'max-content'
+                }}
+              >
+                <div className="flex flex-col">
+                  <DialogHeader className="bg-black/90 backdrop-blur-sm text-white p-4 border-b border-white/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <DialogTitle className="text-xl font-bold">
+                          {selectedMeme.title}
+                        </DialogTitle>
+                        <p className="text-sm opacity-90">
+                          Por: {selectedMeme.submittedBy}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          onClick={() => handleDownload(selectedMeme.imageUrl, selectedMeme.title)}
+                          variant="secondary"
+                          size="sm"
+                          className="bg-white/20 hover:bg-white/30 text-white border-0"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Descargar
+                        </Button>
+                        <Button
+                          onClick={() => setSelectedMeme(null)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-white hover:bg-white/20"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                  </DialogHeader>
+                  
+                  {/* Scale Controls */}
+                  <div className="bg-black/80 backdrop-blur-sm text-white p-3 border-b border-white/20">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Zoom: {Math.round(imageScale * 100)}%</span>
+                      <div className="flex items-center space-x-3 flex-1 mx-4">
+                        <input
+                          type="range"
+                          min="0.1"
+                          max="3"
+                          step="0.1"
+                          value={imageScale}
+                          onChange={(e) => setImageScale(parseFloat(e.target.value))}
+                          className="flex-1 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+                        />
+                      </div>
                       <Button
-                        onClick={() => handleDownload(selectedMeme.imageUrl, selectedMeme.title)}
-                        variant="secondary"
-                        size="sm"
-                        className="bg-white/20 hover:bg-white/30 text-white border-0"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        Descargar
-                      </Button>
-                      <Button
-                        onClick={() => setSelectedMeme(null)}
+                        onClick={() => setImageScale(1)}
                         variant="ghost"
                         size="sm"
                         className="text-white hover:bg-white/20"
                       >
-                        <X className="w-4 h-4" />
+                        Reset
                       </Button>
                     </div>
                   </div>
-                </DialogHeader>
-                
-                <div className="flex items-center justify-center bg-black">
-                  <img
-                    src={selectedMeme.imageUrl}
-                    alt={selectedMeme.title}
-                    className="max-w-full max-h-[90vh] object-contain"
-                  />
+                  
+                  <div className="flex items-center justify-center bg-black p-4">
+                    <img
+                      src={selectedMeme.imageUrl}
+                      alt={selectedMeme.title}
+                      className="max-w-full max-h-[60vh] object-contain"
+                    />
+                  </div>
                 </div>
               </div>
-            )}
-          </DialogContent>
-        </Dialog>
+            </div>
+          </Dialog>
+        )}
       </div>
     </div>
   );
