@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Download, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { format, addDays, subDays } from "date-fns";
+import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { addDays, format, subDays } from "date-fns";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Plus,
+  X,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
 import MemeSubmissionForm from "./MemeSubmissionForm";
 
 // Custom slider styles
@@ -56,37 +63,59 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
     try {
       // Try to load a manifest file for the day that lists available memes
       const manifestResponse = await fetch(`/memes/${day}/manifest.json`);
-      
+
       if (manifestResponse.ok) {
         const manifest = await manifestResponse.json();
-        const localMemes: Meme[] = manifest.memes.map((memeInfo: any, index: number) => ({
-          id: index + 1,
-          title: memeInfo.title || (day === 0 ? 'Meme de Julio se acerca' : `Meme del ${day} de julio`),
-          imageUrl: `/memes/${day}/${memeInfo.filename}`,
-          submittedBy: memeInfo.submittedBy || 'Usuario',
-          approved: true,
-        }));
+        const localMemes: Meme[] = manifest.memes.map(
+          (memeInfo: any, index: number) => ({
+            id: index + 1,
+            title:
+              memeInfo.title ||
+              (day === 0
+                ? "Meme de Julio se acerca"
+                : `Meme del ${day} de julio`),
+            imageUrl: `/memes/${day}/${memeInfo.filename}`,
+            submittedBy: memeInfo.submittedBy || "Usuario",
+            approved: true,
+          })
+        );
         setMemes(localMemes);
       } else {
         // Fallback: try to load a simple list of common filenames
         const commonFilenames = [
-          '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg',
-          '1.png', '2.png', '3.png', '4.png', '5.png',
-          'meme.jpg', 'meme.png', 'image.jpg', 'image.png'
+          "1.jpg",
+          "2.jpg",
+          "3.jpg",
+          "4.jpg",
+          "5.jpg",
+          "1.png",
+          "2.png",
+          "3.png",
+          "4.png",
+          "5.png",
+          "meme.jpg",
+          "meme.png",
+          "image.jpg",
+          "image.png",
         ];
-        
+
         const localMemes: Meme[] = [];
-        
+
         // Check each common filename
         for (const filename of commonFilenames) {
           try {
-            const imageResponse = await fetch(`/memes/${day}/${filename}`, { method: 'HEAD' });
+            const imageResponse = await fetch(`/memes/${day}/${filename}`, {
+              method: "HEAD",
+            });
             if (imageResponse.ok) {
               localMemes.push({
                 id: localMemes.length + 1,
-                title: day === 0 ? 'Meme de Julio se acerca' : `Meme del ${day} de julio`,
+                title:
+                  day === 0
+                    ? "Meme de Julio se acerca"
+                    : `Meme del ${day} de julio`,
                 imageUrl: `/memes/${day}/${filename}`,
-                submittedBy: 'Usuario',
+                submittedBy: "Usuario",
                 approved: true,
               });
             }
@@ -95,11 +124,11 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
             continue;
           }
         }
-        
+
         setMemes(localMemes);
       }
     } catch (error) {
-      console.error('Error loading memes for day', day, ':', error);
+      console.error("Error loading memes for day", day, ":", error);
       setMemes([]);
     }
   };
@@ -107,9 +136,12 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
   // Load memes when component mounts or date changes
   useEffect(() => {
     // For Day 0, use day "0", for July dates use the day number
-    const dayNumber = currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear 
-      ? 0 
-      : currentDate.getDate();
+    const dayNumber =
+      currentDate.getMonth() === 5 &&
+      currentDate.getDate() === 30 &&
+      currentDate.getFullYear() === currentYear
+        ? 0
+        : currentDate.getDate();
     loadLocalMemes(dayNumber);
   }, [currentDate]);
 
@@ -129,29 +161,44 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg`;
+      link.download = `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading image:', error);
+      console.error("Error downloading image:", error);
       // Fallback: open image in new tab
-      window.open(imageUrl, '_blank');
+      window.open(imageUrl, "_blank");
     }
   };
 
-  const navigateDay = (direction: 'prev' | 'next') => {
-    const newDate = direction === 'prev' ? subDays(currentDate, 1) : addDays(currentDate, 1);
-    
+  const navigateDay = (direction: "prev" | "next") => {
+    const newDate =
+      direction === "prev" ? subDays(currentDate, 1) : addDays(currentDate, 1);
+
     // Allow navigation within July of current year, or to/from Day 0 (June 30th)
-    const isDayZero = currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear;
-    const isJulyDate = newDate.getMonth() === 6 && newDate.getFullYear() === currentYear;
-    const isFromDayZeroToJuly = isDayZero && newDate.getMonth() === 6 && newDate.getDate() === 1 && newDate.getFullYear() === currentYear;
-    const isFromJulyToDayZero = currentDate.getMonth() === 6 && currentDate.getDate() === 1 && currentDate.getFullYear() === currentYear && newDate.getMonth() === 5 && newDate.getDate() === 30 && newDate.getFullYear() === currentYear;
-    
+    const isDayZero =
+      currentDate.getMonth() === 5 &&
+      currentDate.getDate() === 30 &&
+      currentDate.getFullYear() === currentYear;
+    const isJulyDate =
+      newDate.getMonth() === 6 && newDate.getFullYear() === currentYear;
+    const isFromDayZeroToJuly =
+      isDayZero &&
+      newDate.getMonth() === 6 &&
+      newDate.getDate() === 1 &&
+      newDate.getFullYear() === currentYear;
+    const isFromJulyToDayZero =
+      currentDate.getMonth() === 6 &&
+      currentDate.getDate() === 1 &&
+      currentDate.getFullYear() === currentYear &&
+      newDate.getMonth() === 5 &&
+      newDate.getDate() === 30 &&
+      newDate.getFullYear() === currentYear;
+
     if (isJulyDate || isFromDayZeroToJuly || isFromJulyToDayZero) {
       setCurrentDate(newDate);
       if (onDateChange) {
@@ -162,23 +209,41 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
 
   const canNavigatePrev = () => {
     const prevDay = subDays(currentDate, 1);
-    const isDayZero = currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear;
-    const isJulyDate = prevDay.getMonth() === 6 && prevDay.getFullYear() === currentYear;
-    const isFromDayZeroToJuly = isDayZero && prevDay.getMonth() === 6 && prevDay.getDate() === 1 && prevDay.getFullYear() === currentYear;
+    const isDayZero =
+      currentDate.getMonth() === 5 &&
+      currentDate.getDate() === 30 &&
+      currentDate.getFullYear() === currentYear;
+    const isJulyDate =
+      prevDay.getMonth() === 6 && prevDay.getFullYear() === currentYear;
+    const isFromDayZeroToJuly =
+      isDayZero &&
+      prevDay.getMonth() === 6 &&
+      prevDay.getDate() === 1 &&
+      prevDay.getFullYear() === currentYear;
     return isJulyDate || isFromDayZeroToJuly;
   };
 
   const canNavigateNext = () => {
     const nextDay = addDays(currentDate, 1);
-    const isDayZero = currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear;
-    const isJulyDate = nextDay.getMonth() === 6 && nextDay.getFullYear() === currentYear;
-    const isFromJulyToDayZero = currentDate.getMonth() === 6 && currentDate.getDate() === 1 && currentDate.getFullYear() === currentYear && nextDay.getMonth() === 5 && nextDay.getDate() === 30 && nextDay.getFullYear() === currentYear;
+    const isDayZero =
+      currentDate.getMonth() === 5 &&
+      currentDate.getDate() === 30 &&
+      currentDate.getFullYear() === currentYear;
+    const isJulyDate =
+      nextDay.getMonth() === 6 && nextDay.getFullYear() === currentYear;
+    const isFromJulyToDayZero =
+      currentDate.getMonth() === 6 &&
+      currentDate.getDate() === 1 &&
+      currentDate.getFullYear() === currentYear &&
+      nextDay.getMonth() === 5 &&
+      nextDay.getDate() === 30 &&
+      nextDay.getFullYear() === currentYear;
     return isJulyDate || isFromJulyToDayZero;
   };
 
   if (showSubmissionForm) {
     return (
-      <MemeSubmissionForm 
+      <MemeSubmissionForm
         date={currentDate}
         onBack={() => setShowSubmissionForm(false)}
       />
@@ -211,10 +276,10 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Volver al Calendario
           </Button>
-          
+
           <div className="flex items-center space-x-4">
             <Button
-              onClick={() => navigateDay('prev')}
+              onClick={() => navigateDay("prev")}
               variant="outline"
               size="sm"
               disabled={!canNavigatePrev()}
@@ -222,16 +287,17 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            
+
             <h1 className="text-5xl font-bold text-white text-center drop-shadow-lg whitespace-nowrap">
-              {currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear 
-                ? "Julio se acerca" 
-                : `Memes del ${format(currentDate, "d 'de julio'")}`
-              }
+              {currentDate.getMonth() === 5 &&
+              currentDate.getDate() === 30 &&
+              currentDate.getFullYear() === currentYear
+                ? "Julio se acerca"
+                : `Memes del ${format(currentDate, "d 'de julio'")}`}
             </h1>
-            
+
             <Button
-              onClick={() => navigateDay('next')}
+              onClick={() => navigateDay("next")}
               variant="outline"
               size="sm"
               disabled={!canNavigateNext()}
@@ -240,7 +306,7 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
-          
+
           <Button
             onClick={() => setShowSubmissionForm(true)}
             className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold shadow-lg"
@@ -254,7 +320,7 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
         <div className="flex lg:hidden items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <Button
-              onClick={() => navigateDay('prev')}
+              onClick={() => navigateDay("prev")}
               variant="outline"
               size="sm"
               disabled={!canNavigatePrev()}
@@ -262,9 +328,9 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            
+
             <Button
-              onClick={() => navigateDay('next')}
+              onClick={() => navigateDay("next")}
               variant="outline"
               size="sm"
               disabled={!canNavigateNext()}
@@ -273,7 +339,7 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
-          
+
           <Button
             onClick={() => setShowSubmissionForm(true)}
             className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold shadow-lg"
@@ -290,7 +356,8 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
                 ¡No hay memes para este día aún!
               </h2>
               <p className="text-white/80 mb-6">
-                Sé el primero en subir un meme para el {format(currentDate, "d 'de julio'")}
+                Sé el primero en subir un meme para el{" "}
+                {format(currentDate, "d 'de julio'")}
               </p>
               <Button
                 onClick={() => setShowSubmissionForm(true)}
@@ -306,7 +373,7 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
             {memes.map((meme) => (
               <div
                 key={meme.id}
-                className="bg-white/95 backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl border border-white/20 hover:scale-105 transition-transform duration-300 cursor-pointer"
+                className="bg-white/95 backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl border border-white/20 hover:scale-105 transition-transform duration-300 cursor-pointer max-w-md w-full"
                 onClick={() => handleMemeClick(meme)}
               >
                 <div className="relative justify-center flex aspect-square overflow-hidden">
@@ -335,7 +402,8 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
                     {meme.title}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Por: <span className="font-semibold">{meme.submittedBy}</span>
+                    Por:{" "}
+                    <span className="font-semibold">{meme.submittedBy}</span>
                   </p>
                 </div>
               </div>
@@ -347,14 +415,14 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
         {selectedMeme && (
           <Dialog open={true} onOpenChange={() => setSelectedMeme(null)}>
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <div 
+              <div
                 className="bg-black rounded-lg shadow-2xl transition-transform duration-200 origin-center overflow-hidden"
-                style={{ 
+                style={{
                   transform: `scale(${imageScale})`,
                   maxWidth: `${100 / imageScale}%`,
                   maxHeight: `${100 / imageScale}%`,
-                  width: 'max-content',
-                  height: 'max-content'
+                  width: "max-content",
+                  height: "max-content",
                 }}
               >
                 <div className="flex flex-col">
@@ -370,7 +438,12 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Button
-                          onClick={() => handleDownload(selectedMeme.imageUrl, selectedMeme.title)}
+                          onClick={() =>
+                            handleDownload(
+                              selectedMeme.imageUrl,
+                              selectedMeme.title
+                            )
+                          }
                           variant="secondary"
                           size="sm"
                           className="bg-white/20 hover:bg-white/30 text-white border-0"
@@ -389,11 +462,13 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
                       </div>
                     </div>
                   </DialogHeader>
-                  
+
                   {/* Scale Controls */}
                   <div className="bg-black/80 backdrop-blur-sm text-white p-3 border-b border-white/20">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Zoom: {Math.round(imageScale * 100)}%</span>
+                      <span className="text-sm font-medium">
+                        Zoom: {Math.round(imageScale * 100)}%
+                      </span>
                       <div className="flex items-center space-x-3 flex-1 mx-4">
                         <input
                           type="range"
@@ -401,7 +476,9 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
                           max="3"
                           step="0.1"
                           value={imageScale}
-                          onChange={(e) => setImageScale(parseFloat(e.target.value))}
+                          onChange={(e) =>
+                            setImageScale(parseFloat(e.target.value))
+                          }
                           className="flex-1 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
                         />
                       </div>
@@ -415,7 +492,7 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-center bg-black p-4">
                     <img
                       src={selectedMeme.imageUrl}
