@@ -160,8 +160,8 @@ const Memes = () => {
                     caption_label: "text-3xl font-bold text-gray-800",
                     nav: "hidden", // Hide navigation buttons
                     table: "w-full border-collapse space-y-2",
-                    head_row: "flex mb-4",
-                    head_cell: "text-gray-600 rounded-md w-16 h-16 font-semibold text-xl flex items-center justify-center",
+                    head_row: "flex mb-0",
+                    head_cell: "text-gray-600 rounded-md w-16 h-0 font-semibold text-xl flex items-center justify-center invisible",
                     row: "flex w-full mt-3",
                     cell: "relative p-1 text-center text-xl focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-gradient-to-r [&:has([aria-selected])]:from-purple-500 [&:has([aria-selected])]:to-pink-500 [&:has([aria-selected])]:text-white [&:has([aria-selected])]:rounded-xl",
                     day: "h-16 w-16 p-0 font-semibold aria-selected:opacity-100 hover:bg-gradient-to-r hover:from-purple-400 hover:to-pink-400 hover:text-white rounded-xl transition-all duration-200 cursor-pointer text-gray-700 text-xl",
