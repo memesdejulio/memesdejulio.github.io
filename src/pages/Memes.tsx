@@ -11,7 +11,7 @@ const Memes = () => {
   
   // Get current year and set July as the default month
   const currentYear = new Date().getFullYear();
-  const julyDate = new Date(currentYear, 6, 1); // July is month 6 (0-indexed)
+  const julyDate = new Date(currentYear, 6, 15); // July is month 6 (0-indexed), use middle of month for better view
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date(currentYear, 6, 1)); // Start with first week of July
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -50,25 +50,19 @@ const Memes = () => {
           <Button
             variant="outline"
             onClick={() => navigateWeek('prev')}
-            className="h-12 px-6 rounded-full bg-purple-500 hover:bg-purple-600 text-white border-0 font-semibold"
+            className="h-12 w-12 rounded-full bg-purple-500 hover:bg-purple-600 text-white border-0 font-semibold p-0"
             disabled={currentWeek.getTime() <= new Date(currentYear, 6, 1).getTime()}
           >
-            <ChevronLeft className="h-5 w-5 mr-2" />
-            Previous Week
+            <ChevronLeft className="h-5 w-5" />
           </Button>
-          
-          <h2 className="text-2xl font-bold text-gray-800">
-            {format(startOfWeek(currentWeek, { weekStartsOn: 0 }), 'MMM d')} - {format(endOfWeek(currentWeek, { weekStartsOn: 0 }), 'MMM d, yyyy')}
-          </h2>
           
           <Button
             variant="outline"
             onClick={() => navigateWeek('next')}
-            className="h-12 px-6 rounded-full bg-purple-500 hover:bg-purple-600 text-white border-0 font-semibold"
+            className="h-12 w-12 rounded-full bg-purple-500 hover:bg-purple-600 text-white border-0 font-semibold p-0"
             disabled={currentWeek.getTime() >= new Date(currentYear, 6, 25).getTime()}
           >
-            Next Week
-            <ChevronRight className="h-5 w-5 ml-2" />
+            <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
 
@@ -155,6 +149,9 @@ const Memes = () => {
                   selected={selectedDate}
                   onSelect={handleDateSelect}
                   month={julyDate}
+                  showOutsideDays={true}
+                  numberOfMonths={1}
+                  fixedWeeks={true}
                   className="scale-150 md:scale-200 origin-center"
                   classNames={{
                     months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
@@ -174,7 +171,11 @@ const Memes = () => {
                     day_disabled: "text-gray-300 opacity-50 cursor-not-allowed",
                     day_hidden: "invisible",
                   }}
-                  disabled={(date) => date.getMonth() !== 6 || date.getFullYear() !== currentYear}
+                  disabled={(date) => {
+                    // Only disable dates that are not in July of current year
+                    // This allows the calendar to show the full month view
+                    return date.getMonth() !== 6 || date.getFullYear() !== currentYear;
+                  }}
                 />
               </div>
             </div>
