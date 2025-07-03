@@ -19,7 +19,7 @@ const Memes = () => {
 
 	// Get current year and set July as the default month
 	const currentYear = new Date().getFullYear();
-	const julyDate = new Date(currentYear, 6, 1); // July is month 6 (0-indexed)
+	const julyDate = new Date(currentYear, 6, 15); // July is month 6 (0-indexed), use middle of month for better view
 	const [currentWeek, setCurrentWeek] = useState<Date>(
 		new Date(currentYear, 6, 1)
 	); // Start with first week of July
