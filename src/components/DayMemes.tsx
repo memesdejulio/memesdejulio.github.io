@@ -163,7 +163,20 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-400 via-red-500 to-pink-500 p-4">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        {/* Mobile: Back button at top */}
+        <div className="block lg:hidden mb-4">
+          <Button
+            onClick={onBack}
+            variant="outline"
+            className="bg-white/90 backdrop-blur-sm border-white/30 hover:bg-white text-purple-600 font-semibold"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Volver al Calendario
+          </Button>
+        </div>
+
+        {/* Desktop: Full header with back button, title, and contribute button */}
+        <div className="hidden lg:flex items-center justify-between mb-8">
           <Button
             onClick={onBack}
             variant="outline"
@@ -184,12 +197,45 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
               <ChevronLeft className="w-4 h-4" />
             </Button>
             
-            <h1 className="text-3xl md:text-5xl font-bold text-white text-center drop-shadow-lg whitespace-nowrap">
+            <h1 className="text-5xl font-bold text-white text-center drop-shadow-lg whitespace-nowrap">
               {currentDate.getMonth() === 5 && currentDate.getDate() === 30 && currentDate.getFullYear() === currentYear 
                 ? "Julio se acerca" 
                 : `Memes del ${format(currentDate, "d 'de julio'")}`
               }
             </h1>
+            
+            <Button
+              onClick={() => navigateDay('next')}
+              variant="outline"
+              size="sm"
+              disabled={!canNavigateNext()}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+          
+          <Button
+            onClick={() => setShowSubmissionForm(true)}
+            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold shadow-lg"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Contribuir Meme
+          </Button>
+        </div>
+
+        {/* Mobile: Navigation and contribute button */}
+        <div className="flex lg:hidden items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <Button
+              onClick={() => navigateDay('prev')}
+              variant="outline"
+              size="sm"
+              disabled={!canNavigatePrev()}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
             
             <Button
               onClick={() => navigateDay('next')}
