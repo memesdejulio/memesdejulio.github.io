@@ -366,7 +366,11 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {memes.map((meme) => (
-              <MemeCardCompounded meme={meme} handleMemeClick={handleMemeClick}>
+              <MemeCardCompounded
+                key={meme.id}
+                meme={meme}
+                handleMemeClick={handleMemeClick}
+              >
                 <MemeCardCompounded.Container>
                   <MemeCardCompounded.ImageMeme />
                   {currentDate.getDate() === 31 &&
