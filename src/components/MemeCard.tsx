@@ -101,8 +101,6 @@ const formatTime = (seconds: number) => {
 const MemeFooterMusic = ({ song }: { song: string }) => {
   const { meme } = useMemeCard();
 
-  if (!song) return null;
-
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -145,6 +143,8 @@ const MemeFooterMusic = ({ song }: { song: string }) => {
       setProgress(newTime);
     }
   };
+
+  if (!song) return null;
 
   return (
     <div className="p-4 border-t bg-white/90 backdrop-blur-sm rounded-b-xl shadow-inner border-white/20">
