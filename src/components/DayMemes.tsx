@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { format, addDays, subDays } from 'date-fns';
 import MemeSubmissionForm from './MemeSubmissionForm';
-import { MemeCard } from './MemeCard';
+import { MemeCardCompounded } from './MemeCard';
 
 import { DialogMeme } from './DialogMeme';
 
@@ -379,16 +379,36 @@ const DayMemes: React.FC<DayMemesProps> = ({ date, onBack, onDateChange }) => {
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{memes.map((meme) => (
-							<MemeCard meme={meme} handleMemeClick={handleMemeClick} />
+							<MemeCardCompounded meme={meme} handleMemeClick={handleMemeClick}>
+								<MemeCardCompounded.Container>
+									<MemeCardCompounded.ImageMeme />
+									{currentDate.getDate() === 31 &&
+									currentDate.getMonth() === 6 ? (
+										<MemeCardCompounded.MemeFooterMusic
+											song={
+												'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+											}
+										/>
+									) : (
+										<MemeCardCompounded.MemeFooter />
+									)}
+								</MemeCardCompounded.Container>
+							</MemeCardCompounded>
 						))}
 					</div>
 				)}
 
 				{/* Image Modal */}
-        {selectedMeme && (
-          <DialogMeme key={selectedMeme.id} selectedMeme={selectedMeme} handleDownload={handleDownload} imageScale={imageScale} setImageScale={setImageScale} setSelectedMeme={setSelectedMeme} />
-        )}
-
+				{selectedMeme && (
+					<DialogMeme
+						key={selectedMeme.id}
+						selectedMeme={selectedMeme}
+						handleDownload={handleDownload}
+						imageScale={imageScale}
+						setImageScale={setImageScale}
+						setSelectedMeme={setSelectedMeme}
+					/>
+				)}
 			</div>
 		</div>
 	);
